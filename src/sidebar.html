@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <!-- Compiled and minified CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+    />
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        document.getElementById("btn").addEventListener("click", doStuff);
+        const elems = document.querySelectorAll(".datepicker");
+        M.Datepicker.init(elems);
+      });
+      function showAlert(message) {
+        alert(message);
+      }
+      function doStuff() {
+        let userInfo = {};
+        userInfo.date = document.getElementById("meeting-date").value;
+        userInfo.pubmedId = document.getElementById("pubmed-id").value;
+        google.script.run.withSuccessHandler(showAlert).userClicked(userInfo);
+        document.getElementById("meeting-date").value = "";
+        document.getElementById("pubmed-id").value = "";
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="input-field col s12">
+          <input type="text" id="meeting-date" class="datepicker" />
+          <label for="meeting-date">Date of Journal Club</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <input id="pubmed-id" type="text" class="validate" />
+          <label for="pubmed-id">PubMed ID</label>
+        </div>
+      </div>
+      <div class="row">
+        <button
+          class="btn waves-effect waves-light"
+          id="btn"
+          type="submit"
+          name="action"
+        >
+          Submit
+          <i class="material-icons right">send</i>
+        </button>
+      </div>
+    </div>
+  </body>
+</html>
