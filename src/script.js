@@ -1,5 +1,4 @@
 const ss = SpreadsheetApp.getActiveSpreadsheet();
-const ws = ss.getSheetByName("main");
 
 function onOpen() {
   SpreadsheetApp.getUi()
@@ -9,10 +8,32 @@ function onOpen() {
 }
 
 function openSidebar() {
-  const htmlOutput = HtmlService.createHtmlOutputFromFile("sidebar").setTitle(
-    "Input Paper Information"
-  );
+  const htmlOutput = HtmlService.createTemplateFromFile("sidebar").evaluate();
   SpreadsheetApp.getUi().showSidebar(htmlOutput);
+}
+
+function getJournalClubSettings() {
+  const ws = ss.getSheetByName("settings");
+  const numRow = ws.getLastRow() - 1;
+  const titles = ws
+    .getRange(2, 1, numRow, 1)
+    .getValues()
+    .map(function (row) {
+      return row[0];
+    });
+  const values = ws
+    .getRange(2, 2, numRow, 1)
+    .getValues()
+    .map(function (row) {
+      return row[0];
+    });
+  const dayOfWeekArray = ["日", "月", "火", "水", "木", "金", "土"];
+  const settings = {};
+  settings.dayOfWeek = dayOfWeekArray.indexOf(
+    values[titles.indexOf("抄読会開催曜日")]
+  );
+  Logger.log(settings);
+  return settings;
 }
 
 function userClicked(userInfo) {
@@ -32,6 +53,7 @@ function userClicked(userInfo) {
     } else {
       const title = items[6].getText();
       const journal = items[3].getText();
+      const ws = ss.getSheetByName("list");
       ws.appendRow([
         new Date(),
         userInfo.date,
@@ -44,16 +66,26 @@ function userClicked(userInfo) {
   }
 }
 
-function doGet() {
-  return HtmlService.createTemplateFromFile("index").evaluate();
+function getWebAppUrl(page) {
+  const url = ScriptApp.getService().getUrl().toString();
+  Logger.log(url.replace("dev", "exec") + page);
+  return url.replace("dev", "exec") + page;
+}
+
+function doGet(e) {
+  const page = e.parameter["p"];
+  if (page == "index" || page == null) {
+    return HtmlService.createTemplateFromFile("index").evaluate();
+  } else if (page == "manual") {
+    return HtmlService.createTemplateFromFile("manual").evaluate();
+  }
 }
 
 function getTable() {
+  const ws = ss.getSheetByName("list");
   const numRow = ws.getLastRow() - 1;
   const numCol = ws.getLastColumn();
-
   const dataInSheet = ws.getRange(2, 1, numRow, numCol).getValues();
-
   const paperList = dataInSheet.map(function (row) {
     return {
       date: new Date(row[1]).toLocaleDateString(),
@@ -62,11 +94,11 @@ function getTable() {
       pubmedId: row[2],
     };
   });
-
   var tableText = "";
   paperList.forEach(function (e) {
     let rowText =
-      "<tr><td>" +
+      "<tr>" +
+      "<td>" +
       e.date +
       "</td>" +
       "<td>" +
@@ -77,8 +109,9 @@ function getTable() {
       "</i></td>" +
       "<td><a href='https://pubmed.ncbi.nlm.nih.gov/" +
       e.pubmedId +
-      "/' target='_blank' rel='noopener noreferrer'><i class='bi bi-link'></i></a></td></tr>";
-
+      "/' target='_blank' rel='noopener noreferrer'><i class='bi bi-link'></i>" +
+      "</a></td>" +
+      "</tr>";
     tableText += rowText;
   });
   return tableText;

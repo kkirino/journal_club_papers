@@ -14,10 +14,23 @@
       rel="stylesheet"
     />
     <script>
+      function initDatePicker(settings) {
+        const option = {
+          disableDayFn: function (day) {
+            return day.getDay() !== settings.dayOfWeek;
+          },
+          autoClose: true,
+          minDate: new Date(),
+        };
+        const datePicker = document.getElementById("meeting-date");
+        M.Datepicker.init(datePicker, option);
+      }
       document.addEventListener("DOMContentLoaded", function () {
+        const dropdowns = document.querySelectorAll(".dropdown-trigger");
+        M.Dropdown.init(dropdowns, { constrainWidth: false });
+        const datePickers = document.querySelectorAll(".datepicker");
+        google.script.run.withSuccessHandler(initDatePicker).getJournalClubSettings();
         document.getElementById("btn").addEventListener("click", doStuff);
-        const elems = document.querySelectorAll(".datepicker");
-        M.Datepicker.init(elems);
       });
       function showAlert(message) {
         alert(message);
@@ -35,18 +48,46 @@
   <body>
     <div class="container">
       <div class="row">
+        <p>
+          <i class="material-icons">check</i
+          >操作については以下のリンクを参照してください
+        </p>
+        <a class="dropdown-trigger btn" href="#" data-target="dropdown1"
+          >参照リンク</a
+        >
+        <ul id="dropdown1" class="dropdown-content">
+          <li>
+            <a href="<?!= getWebAppUrl('?p=manual'); ?>" target="_blank">
+              <i class="material-icons">insert_drive_file</i>操作マニュアル
+            </a>
+          </li>
+          <li>
+            <a href="<?!= getWebAppUrl('?p=index'); ?>" target="_blank">
+              <i class="material-icons">web</i>Web アプリを見る</a
+            >
+          </li>
+        </ul>
+        <br />
+        <br />
+      </div>
+      <div class="row">
+        <p>
+          <i class="material-icons">check</i>抄読会の開催日を入力してください
+        </p>
         <div class="input-field col s12">
           <input type="text" id="meeting-date" class="datepicker" />
-          <label for="meeting-date">Date of Journal Club</label>
+          <label for="meeting-date">開催日</label>
         </div>
       </div>
       <div class="row">
+        <p><i class="material-icons">check</i>PubMed ID を入力してください</p>
         <div class="input-field col s12">
           <input id="pubmed-id" type="text" class="validate" />
           <label for="pubmed-id">PubMed ID</label>
         </div>
       </div>
       <div class="row">
+        <p><i class="material-icons">check</i>ボタンを押して登録します</p>
         <button
           class="btn waves-effect waves-light"
           id="btn"
