@@ -20,7 +20,6 @@
             return day.getDay() !== settings.dayOfWeek;
           },
           autoClose: true,
-          minDate: new Date(),
         };
         const datePicker = document.getElementById("meeting-date");
         M.Datepicker.init(datePicker, option);
@@ -29,7 +28,7 @@
         const dropdowns = document.querySelectorAll(".dropdown-trigger");
         M.Dropdown.init(dropdowns, { constrainWidth: false });
         const datePickers = document.querySelectorAll(".datepicker");
-        google.script.run.withSuccessHandler(initDatePicker).getJournalClubSettings();
+        google.script.run.withSuccessHandler(initDatePicker).getSettings();
         document.getElementById("btn").addEventListener("click", doStuff);
       });
       function showAlert(message) {
@@ -57,12 +56,12 @@
         >
         <ul id="dropdown1" class="dropdown-content">
           <li>
-            <a href="<?!= getWebAppUrl('?p=manual'); ?>" target="_blank">
+            <a href="<?!= getSettings().manualPageUrl; ?>" target="_blank">
               <i class="material-icons">insert_drive_file</i>操作マニュアル
             </a>
           </li>
           <li>
-            <a href="<?!= getWebAppUrl('?p=index'); ?>" target="_blank">
+            <a href="<?!= getSettings().webAppUrl; ?>" target="_blank">
               <i class="material-icons">web</i>Web アプリを見る</a
             >
           </li>

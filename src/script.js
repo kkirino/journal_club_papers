@@ -12,7 +12,7 @@ function openSidebar() {
   SpreadsheetApp.getUi().showSidebar(htmlOutput);
 }
 
-function getJournalClubSettings() {
+function getSettings() {
   const ws = ss.getSheetByName("settings");
   const numRow = ws.getLastRow() - 1;
   const titles = ws
@@ -32,7 +32,8 @@ function getJournalClubSettings() {
   settings.dayOfWeek = dayOfWeekArray.indexOf(
     values[titles.indexOf("抄読会開催曜日")]
   );
-  Logger.log(settings);
+  settings.manualPageUrl = values[titles.indexOf("マニュアルページのURL")];
+  settings.webAppUrl = values[titles.indexOf("WebアプリのURL")];
   return settings;
 }
 
@@ -47,7 +48,6 @@ function userClicked(userInfo) {
     const document = XmlService.parse(xml);
     const root = document.getRootElement();
     const items = root.getChildren()[0].getChildren();
-
     if (items.length === 0) {
       return "入力された PubMed ID は存在しません";
     } else {
@@ -66,19 +66,8 @@ function userClicked(userInfo) {
   }
 }
 
-function getWebAppUrl(page) {
-  const url = ScriptApp.getService().getUrl().toString();
-  Logger.log(url.replace("dev", "exec") + page);
-  return url.replace("dev", "exec") + page;
-}
-
-function doGet(e) {
-  const page = e.parameter["p"];
-  if (page == "index" || page == null) {
-    return HtmlService.createTemplateFromFile("index").evaluate();
-  } else if (page == "manual") {
-    return HtmlService.createTemplateFromFile("manual").evaluate();
-  }
+function doGet() {
+  return HtmlService.createTemplateFromFile("index").evaluate();
 }
 
 function getTable() {
@@ -94,24 +83,21 @@ function getTable() {
       pubmedId: row[2],
     };
   });
-  var tableText = "";
+  let tableText = "";
   paperList.forEach(function (e) {
-    let rowText =
-      "<tr>" +
-      "<td>" +
+    const rowText =
+      "<tr><td>" +
       e.date +
       "</td>" +
       "<td>" +
       e.title +
+      "<a href='https://pubmed.ncbi.nlm.nih.gov/" +
+      e.pubmedId +
+      "/' target='_blank' rel='noopener noreferrer'><i class='bi bi-link'></i></a>" +
       "</td>" +
       "<td><i>" +
       e.journal +
-      "</i></td>" +
-      "<td><a href='https://pubmed.ncbi.nlm.nih.gov/" +
-      e.pubmedId +
-      "/' target='_blank' rel='noopener noreferrer'><i class='bi bi-link'></i>" +
-      "</a></td>" +
-      "</tr>";
+      "</i></td></tr>";
     tableText += rowText;
   });
   return tableText;
